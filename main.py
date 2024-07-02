@@ -121,7 +121,7 @@ slurp_juice.set_description("A drink that gradually restores health and shield."
 shifty_shafts.set_item(slurp_juice)
 
 bag = []
-current_cave = pleasant_park
+current_cave = pleasant_park #start at pleasant park
 dead = False
 health = 100 #health, updates when shield, medkit or slurp is used
 
@@ -155,11 +155,11 @@ while not dead:
             fight_with = input()
             if fight_with in bag:
                 if inhabitant.fight(fight_with):
-                    print("Nice work! You won the fight and live!")
+                    print("Nice work! You won the fight and live to fight another day!")
                     current_cave.set_character(None)
                     if Enemy.enemies_to_defeat == 0:
                         print("Congratulations, you have survived another adventure!")
-                        dead = False
+                        dead = True #to restart
                 else:
                     print("You lost the fight. The game ends here.")
                     dead = True
@@ -180,11 +180,6 @@ while not dead:
             print("You placed the " + item.get_name() + " in your bag")
             bag.append(item.get_name())
             current_cave.set_item(None)
-    elif command == "steal":
-        if inhabitant is not None and isinstance(inhabitant, Enemy):
-            inhabitant.steal()
-        else:
-            print("There is no one here to steal from")
     elif command == "bribe":
         if inhabitant is not None and isinstance(inhabitant, Enemy):
             print("You bribe " + inhabitant.name + ". They let you pass safely.")
@@ -196,18 +191,25 @@ while not dead:
             inhabitant.hug()
         else:
             print("There is no one here to hug")
-    elif command == "gift":
-        if inhabitant is not None and isinstance(inhabitant, Friend):
-            print("What gift will you offer?")
-            gift = input()
-            if gift in bag:
-                inhabitant.receive_gift(gift)
-                bag.remove(gift)
-            else:
-                print("You don't have a " + gift)
-        else:
-            print("There is no one here to give a gift to")
+    elif command == "gift" and isinstance(inhabitant, Enemy): #if gift given to enemy, they die
+        if inhabitant is not None:
+            yesorno = input("Are you sure you wish to gift an enemy? ")
+            if yesorno.lower() == "yes":
+                gift = input("What do you wish to gift? ")
+                if gift in bag:
+                    inhabitant.receive_gift(gift)
+                    current_cave.set_character(None)
+            if yesorno.lower() == "no":
+                dead = True
+                print("Your rudeness gets you killed.")   
+    elif command == "gift" and isinstance(inhabitant, Friend):
+        gift = input("What do you wish to gift? ")
+        if gift in bag:
+            inhabitant.receive_gift(gift)
+        else: print("You don't have a" + gift + "to give")
     
+
+
     
     if command == "use Shield":
         if shield_potion.get_name():
