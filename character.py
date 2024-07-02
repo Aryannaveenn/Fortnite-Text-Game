@@ -51,7 +51,7 @@ class Enemy(Character):
         return False
 
     def perform_random_attack(self, character):
-        attack_value = random.randint(20, 35)
+        attack_value = random.randint(40, 100)
         character.decrease_health(attack_value)
         print(f"{character.name} loses {attack_value} health points!")
 
