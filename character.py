@@ -18,7 +18,7 @@ class Character:
             print("[" + self.name + " says]: " + self.conversation)
         
 
-    def fight(self, combat_item):
+    def fight(self):
         print(self.name + " doesn't want to fight with you")
         return True
 
@@ -51,7 +51,7 @@ class Enemy(Character):
         return False
 
     def perform_random_attack(self, character):
-        attack_value = random.randint(5, 15)
+        attack_value = random.randint(20, 35)
         character.decrease_health(attack_value)
         print(f"{character.name} loses {attack_value} health points!")
 
@@ -65,15 +65,14 @@ class Enemy(Character):
                 print(self.name + " swallows you, little wimp")
                 return False
             return True
-
-    def steal(self):
-        print("You steal from " + self.name)
+    def receive_gift(self, gift):
+        print(self.name + " receives your gift but they don't feel too good.... They die because of your kindness.")
+      
 
 
 class Friend(Character):
     def __init__(self, char_name, char_description):
         super().__init__(char_name, char_description)
-        self.feeling = None
         self.health = 100
 
     def set_health(self, health):
