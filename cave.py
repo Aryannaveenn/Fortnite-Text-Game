@@ -36,10 +36,10 @@ class Cave:
     def link_cave(self, cave_to_link, direction):
         self.linked_caves[direction] = cave_to_link
 
-    def get_details(self):
-        print(self.name)
+    def get_details(self): 
+        print("You are at " + self.name)
         print("----------")
-        print(self.description + "\n")
+        print(f"{self.description}" + "\n")
         for direction in self.linked_caves:
             cave = self.linked_caves[direction]
             print(cave.get_name() + " is " + direction + "\n")

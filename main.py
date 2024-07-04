@@ -1,10 +1,10 @@
+import _random
 import random
 from cave import Cave
 from character import Enemy, Friend, Bystander
 from item import Item
 
-
-#Places
+# Places
 pleasant_park = Cave("Pleasant Park")
 pleasant_park.set_description("A popular landing spot with many houses and loot.")
 
@@ -29,7 +29,10 @@ spawn_island.set_description("A small island with minimal resources but strategi
 shifty_shafts = Cave("Shifty Shafts")
 shifty_shafts.set_description("An old mining area with plenty of hiding spots and tunnels.")
 
-#Links
+paradise_palms = Cave("Paradise Palms")
+paradise_palms.set_description("An abandoned desert with a luxurious resort.")
+
+# Links
 salty_springs.link_cave(tilted_towers, "west")
 salty_springs.link_cave(pleasant_park, "north")
 
@@ -48,13 +51,19 @@ weeping_woods.link_cave(pleasant_park, "west")
 salty_springs.link_cave(loot_lake, "east")
 loot_lake.link_cave(salty_springs, "west")
 pleasant_park.link_cave(weeping_woods, "east")
+paradise_palms.link_cave(flush_factory, "west")
+flush_factory.link_cave(paradise_palms, "east")
 
+# Characters
+drift = Enemy("Drift", "A stylish and agile character with impressive speed and reflexes")
+drift.set_conversation("You can't catch me!")
+drift.set_weakness("Shockwave Grenade")
+drift.set_health(85)
 
-#Characters
-storm_king = Enemy("Storm King", "A monstrous entity with immense power")
+storm_king = Enemy("Storm King", "A creature of the storm")
 storm_king.set_conversation("You cannot escape the storm!")
 storm_king.set_weakness("Rocket Launcher")
-storm_king.set_health(100)
+storm_king.set_health(97)
 
 jonesy = Friend("Jonesy", "A reliable teammate")
 jonesy.set_conversation("Stay close and we'll survive. Take this Rocket Launcher to help yourself out against Storm.")
@@ -82,7 +91,7 @@ peely = Friend("Peely", "A lovable banana")
 peely.set_conversation("I'm ripe and ready!")
 peely.set_health(100)
 
-#Set characters
+# Set characters
 salty_springs.set_character(storm_king)
 tilted_towers.set_character(jonesy)
 weeping_woods.set_character(midas)
@@ -90,8 +99,14 @@ loot_lake.set_character(brutus)
 flush_factory.set_character(meowscles)
 spawn_island.set_character(sky)
 shifty_shafts.set_character(peely)
+paradise_palms.set_character(drift)
 
-#Items
+# Items
+
+drum_gun = Item("Drum Gun")
+infinity_blade = Item("Infinity Blade")
+chugjug = Item("Chug Jug")
+
 rocket_launcher = Item("Rocket Launcher")
 rocket_launcher.set_description("A powerful weapon that deals massive damage.")
 tilted_towers.set_item(rocket_launcher)
@@ -120,17 +135,23 @@ slurp_juice = Item("Slurp Juice")
 slurp_juice.set_description("A drink that gradually restores health and shield.")
 shifty_shafts.set_item(slurp_juice)
 
-bag = []
-current_cave = pleasant_park #start at pleasant park
-dead = False
-health = 100 #health, updates when shield, medkit or slurp is used
+shockwave = Item("Shockwave Grenade")
+shockwave.set_description("A grenade that knocks players away, disrupting their movements")
+paradise_palms.set_item(shockwave)
 
-while not dead:
+bag = []
+current_cave = pleasant_park  # start at pleasant park
+dead = False
+health = 100  # health, updates when shield, medkit or slurp is used
+
+while not dead:  # main for loop when player is alive
     print("\n")
     current_cave.get_details()
     inhabitant = current_cave.get_character()
     if inhabitant is not None:
         inhabitant.describe()
+    else:
+        print(f"No one is here at {current_cave.get_name()}")
     item = current_cave.get_item()
     if item is not None:
         item.describe()
@@ -141,14 +162,15 @@ while not dead:
     elif command == "talk":
         if inhabitant is not None and isinstance(inhabitant, Friend):
             inhabitant.talk()
-            talkinpt =  input("What do you wish to say next, Option 1, 2 or 3? ")
+            talkinpt = input("What do you wish to say next, Option 1, 2 or 3? ")
             if talkinpt == "1":
                 print("You say: Have a good day mate!")
             elif talkinpt == "2":
                 print("You say: Stay safe out there!")
             elif talkinpt == "3":
                 print("You say: Nice to meet you!")
-        else: print("There is nobody friendly to talk to.")
+        else:
+            print("There is nobody friendly to talk to.")
     elif command == "fight":
         if inhabitant is not None and isinstance(inhabitant, Enemy):
             print("What will you fight with?")
@@ -157,9 +179,11 @@ while not dead:
                 if inhabitant.fight(fight_with):
                     print("Nice work! You won the fight and live to fight another day!")
                     current_cave.set_character(None)
+                    Enemy.enemies_to_defeat -= 1
+                    print(f"{Enemy.enemies_to_defeat} Enemies left to defeat")
                     if Enemy.enemies_to_defeat == 0:
-                        print("Congratulations, you have survived this adventure")
-                        dead = True #to restart
+                        print("You have killed all the enemies! You win!!")
+                        break
                 else:
                     print("You lost the fight. The game ends here.")
                     dead = True
@@ -170,7 +194,7 @@ while not dead:
     elif command == "pat":
         if inhabitant is not None:
             if isinstance(inhabitant, Enemy):
-                print("You should'nt do that...")
+                print("You shouldn't do that...")
             else:
                 inhabitant.pat()
         else:
@@ -184,16 +208,21 @@ while not dead:
         if inhabitant is not None and isinstance(inhabitant, Enemy):
             print("You bribe " + inhabitant.name + ". They let you pass safely.")
             current_cave.set_character(None)
+            Enemy.enemies_to_defeat -= 1
+            print(f"{Enemy.enemies_to_defeat} Enemies left to defeat")
+            if Enemy.enemies_to_defeat == 0:
+                print("Congratulations! You have defeated all enemies and won the game!")
+                break
         else:
             print("There is no one here to bribe")
         if inhabitant is not None and isinstance(inhabitant, Friend):
             print("That's a friend! You can't bribe friends.")
     elif command == "hug":
-        if inhabitant is not None and isinstance(inhabitant, Friend):
+        if inhabitant is not None and isinstance(inhabitant, Friend or Bystander):
             inhabitant.hug()
         else:
             print("There is no one here to hug")
-    elif command == "gift" and isinstance(inhabitant, Enemy): #if gift given to enemy, they die
+    elif command == "gift" and isinstance(inhabitant, Enemy):  # if gift given to enemy, they die
         if inhabitant is not None:
             yesorno = input("Are you sure you wish to gift an enemy? ")
             if yesorno.lower() == "yes":
@@ -201,45 +230,62 @@ while not dead:
                 if gift in bag:
                     inhabitant.receive_gift(gift)
                     current_cave.set_character(None)
+                    Enemy.enemies_to_defeat -= 1
+                    print(f"{Enemy.enemies_to_defeat} Enemies left to defeat")
+                    if Enemy.enemies_to_defeat == 0:
+                        print("Congratulations! You have defeated all enemies and won the game!")
+                        break
             if yesorno.lower() == "no":
                 dead = True
-                print("Your rudeness gets you killed.")   
+                print("Your rudeness gets you killed.")
     elif command == "gift" and isinstance(inhabitant, Friend):
         gift = input("What do you wish to gift? ")
         if gift in bag:
             inhabitant.receive_gift(gift)
-        else: print("You don't have a" + gift + "to give")
-    
-
-
+        else:
+            print("You don't have a " + gift + " to give")
     
     if command == "use Shield":
         if shield_potion.get_name():
-            health += 50 #adds 50 health when used
-            print("\nYou used a Shield Potion. Your health is now: " , health)
+            health += 50  # adds 50 health when used
+            print("\nYou used a Shield Potion. Your health is now: ", health)
         else:
             print("You don't have a Shield Potion in your bag.")
     if command == "use Medkit":
         if medkit.get_name() in bag:
-            health += 100 #adds 100 health when used
-            print("\nYou used a Medkit. Your health is now:" , health)
+            health += 100  # adds 100 health when used
+            print("\nYou used a Medkit. Your health is now:", health)
         else:
             print("You don't have a Medkit in your bag.")
     if command == "use Slurp Juice":
         if slurp_juice.get_name() in bag:
-            health += 25 #adds 25 health when used
-            print("\nYou used a Slurp Juice. Your health is now: " , health)
+            health += 25  # adds 25 health when used
+            print("\nYou used a Slurp Juice. Your health is now: ", health)
         else:
             print("You don't have a Slurp Juice in your bag.")
-
-def find_easter_egg(): #50/50 chance of getting either items after each command input
-    easter_eggs = ["Golden Scar", "Chug Jug", "Mythic Drum Gun"] 
-    if random.choice([True, False]):
-        egg = random.choice(easter_eggs)
-        print(f"You found an Easter egg: {egg}!")
-        bag.append(egg)
+    if command == "use Chug Jug":
+        if chugjug.get_name() in bag:
+            health += 200  # adds 25 health when used
+            print("\nYou used a Chug Jug. Your health is now: ", health)
+        else:
+            print("You don't have a Chug Jug in your bag.")
+            
+                  
+    def find_easter_egg():  # 1/10 chance of getting either items after each command input
+        egg1 = "Chug Jug"
+        chance = random.randint(1,10)
+        if chance == 1:
+            bag.append(egg1)
+            print(f"You won a {egg1} out of a 1 in 10 chance!")
+        egg2 = "Drum Gun"
+        chance = random.randint(1,10)
+        if chance == 2:
+            bag.append(egg2)
+            print(f"You won a {egg2} out of a 1 in 10 chance!")
+        egg3 = "Infinity Blade"
+        chance = random.randint(1,10)
+        if chance == 3:
+            bag.append(egg3)
+            print(f"You won a {egg3} out of a 1 in 10 chance!")
 
     find_easter_egg()
-
-
-

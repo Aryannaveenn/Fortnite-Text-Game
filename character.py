@@ -9,6 +9,7 @@ class Character:
     def describe(self):
         print(self.name + " is here!")
         print(self.description)
+        
 
     def set_conversation(self, conversation):
         self.conversation = conversation
@@ -46,14 +47,11 @@ class Enemy(Character):
         print(f"{self.name}'s health is now {self.health}.")
         if self.health <= 0:
             print(f"{self.name} has been defeated!")
-            Enemy.enemies_to_defeat -= 1
-            return True
-        return False
 
     def perform_random_attack(self, character):
-        attack_value = random.randint(40, 100)
+        attack_value = random.randint(65, 100) #65 to 100 damage possible with
         character.decrease_health(attack_value)
-        print(f"{character.name} loses {attack_value} health points!")
+        print(f"You hit {character.name} for {attack_value} health points!")
 
     def fight(self, combat_item):
         if combat_item == self.weakness:
@@ -66,7 +64,7 @@ class Enemy(Character):
                 return False
             return True
     def receive_gift(self, gift):
-        print(self.name + " receives your gift but they don't feel too good.... They die because of your kindness.")
+        print(self.name + " receives your gift but they don't feel too good.... They die because of your kindness.") 
       
 
 
@@ -84,6 +82,8 @@ class Friend(Character):
     def receive_gift(self, gift):
         print(self.name + " receives your gift and feels happier!")
     
+    def pat(self):
+        print("You patted " + self.name)
 
 
 class Bystander(Character):
@@ -98,3 +98,6 @@ class Bystander(Character):
             print("[" + self.name + " says]: " + self.conversation)
         else:
             print(self.name + " doesn't want to talk to you")
+    
+    def pat(self):
+        print("You patted " + self.name)
